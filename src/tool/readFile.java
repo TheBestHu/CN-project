@@ -6,6 +6,9 @@ import java.util.HashMap;
 
 /**
  * read each file (common.cfg and peerInfo.cfg) return each in subclass.
+ *
+ * created by Yebowen Hu
+ *
  */
 
 public class readFile {

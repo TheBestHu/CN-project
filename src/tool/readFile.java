@@ -42,11 +42,34 @@ public class readFile {
         FileName = commonInfo.get("FileName");
         FileSize = Integer.parseInt(commonInfo.get("FileSize"));
         PieceSize = Integer.parseInt(commonInfo.get("PieceSize"));
-
+        common.close();
     }
-
+    /**
+     * this part content should be modified after know how to connect peers and that sort of things
+     * @param filepath
+     * @throws IOException
+     */
+    public int[] peerID;
+    public String[] address;
+    public int[] portNo;
+    /**
+     * file determine parameters fileD
+     */
+    public int[] fileD;
     public void readpeer(String filepath) throws IOException{
-
+        String filename = "PeerInfo.cfg";
+        FileReader FR = new FileReader(filename);
+        BufferedReader peerInfo = new BufferedReader(FR);
+        String content = peerInfo.readLine();
+        while(content!=null){
+            int num = 0;
+            String[] info = content.split(" ");
+            peerID[num] = Integer.parseInt(info[0]);
+            address[num] = info[1];
+            portNo[num] = Integer.parseInt(info[2]);
+            fileD[num] = Integer.parseInt(info[3]);
+        }
+        peerInfo.close();
     }
 
 }

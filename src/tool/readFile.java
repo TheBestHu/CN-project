@@ -2,9 +2,7 @@ package tool;
 
 import java.io.*;
 import java.io.BufferedReader;
-import java.util.*;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * read each file (common.cfg and peerInfo.cfg) return each in subclass.

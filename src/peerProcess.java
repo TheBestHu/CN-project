@@ -3,6 +3,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.*;
 import java.util.*;
+import tool.readFile;
 
 public class peerProcess{
 	private int numOfPN;
@@ -13,6 +14,9 @@ public class peerProcess{
 	private Peer optimal = null;
 	private int nTime;
 	private int opnTime;
+	private String filename;
+	private int pieceSize;
+	private int filesize;
 	public LinkedList <Peer> tempList = new LinkedList <> ();
 
     public static void main (String[] args) throws Exception {
@@ -28,7 +32,7 @@ public class peerProcess{
     	return time*1000;
     }
 
-    synchronized void shareInfo(int i){
+    synchronized void shareInfo(int i) throws IOException{
     	int j =0;
     	while(j<fileShareList.size()){
     		fileShareList.get(j).have(i);
@@ -37,7 +41,22 @@ public class peerProcess{
     	if( optimal!=null) optimal.have(i);
     }
 
-    private void readFile(String peerID){
+    private void readFile(String peerID) throws IOException{
+		/**
+		 * need to be modified
+		 */
+		readFile rd=new readFile();
+		rd.readcommon();
+    	rd.readpeer();
+		numOfPN = rd.NumberOfPreferredNeighbors;
+		optimalInterval = rd.OptimisticUnchockingInterval;
+		fileExist = rd.fileD[rd.findID(peerID)];
+		filename = rd.FileName;
+		unChokeInterval = rd.UnchokingInterval;
+		pieceSize =rd.PieceSize;
+		filesize = rd.FileSize;
+
+
     	// read in Common.cfg and PeerInfo.cfg
     }
 
@@ -74,7 +93,7 @@ public class peerProcess{
     		new Thread(channelList).start();
     	}
     }
-    private peerProcess(String peerID){
+    private peerProcess(String peerID) throws IOException{
     	readFile(peerID);
     	startThread();
 

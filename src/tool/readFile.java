@@ -53,11 +53,12 @@ public class readFile {
     public int[] peerID;
     public String[] address;
     public int[] portNo;
+    public HashMap<Integer,Integer> index = new HashMap<Integer,Integer>();
     /**
      * file determine parameters fileD
      */
     public int[] fileD;
-    public void readpeer(String filepath) throws IOException{
+    public void readpeer() throws IOException{
         String filename = "PeerInfo.cfg";
         FileReader FR = new FileReader(filename);
         BufferedReader peerInfo = new BufferedReader(FR);
@@ -69,8 +70,14 @@ public class readFile {
             address[num] = info[1];
             portNo[num] = Integer.parseInt(info[2]);
             fileD[num] = Integer.parseInt(info[3]);
+            index.put(peerID[num],num);
         }
         peerInfo.close();
+
+    }
+    public int findID(String peerID ){
+        int i = index.get(Integer.parseInt(peerID));
+        return i;
     }
 
 }

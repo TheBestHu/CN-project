@@ -1,32 +1,34 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- *
- * @author huanwenxu
+ * Created by xinghe on 2017/4/8.
  */
-public class HandShakeMessage {
-    String HandshakeHeader;
+class HandShakeMessage {
+    String handShake_Header;
     int peerId;
-    private String Handshake_message;
-    HandShakeMessage(int peerId){
-        HandshakeHeader = "P2PFILESHARINGPROJ";
+    private String handShakeMessage;
+
+    //Send a handshake message
+
+    HandShakeMessage(int peerId) {
+        handShake_Header = "P2PFILESHARINGPROJ";
         this.peerId = peerId;
-        Handshake_message = HandshakeHeader+"0000000000"+this.peerId;
+        handShakeMessage = handShake_Header + "0000000000" + peerId;
     }
-    
-    HandShakeMessage(byte[] rcvdHSM) {
-        String stringMessage = new String (rcvdHSM);
-        StringBuffer stringBuffer = new StringBuffer (stringMessage);
-        this.HandshakeHeader = stringBuffer.substring (0, 18);
-        this.peerId = Integer.parseInt (stringBuffer.substring (28, 32));
+
+    //Receive a handshake message and process it to get peerid and header
+
+    HandShakeMessage(byte[] receivedHandSM) {
+        String stringMessage = new String (receivedHandSM);
+        StringBuffer stringBuffer;
+        stringBuffer = new StringBuffer (stringMessage);
+        handShake_Header = stringBuffer.substring (0, 18);
+        peerId = Integer.parseInt (stringBuffer.substring (28, 32));
     }
-    
-    byte[] toByte(){
-        byte[] temp = this.Handshake_message.getBytes();
-        return temp;
+
+    //Convert a handShake message to byte to send
+
+    byte[] handShakeMessageToByte() {
+        byte[] message;
+        message = handShakeMessage.getBytes ();
+        return message;
     }
 }

@@ -1,12 +1,12 @@
+
+/**
+ * @author Yebowen Hu
+ */
 public class PeerConfig {
 
 	private String hostName;
 	private int listeningPort;
 	private boolean hasCompleteFile;
-
-	public PeerConfig()
-	{
-	}
 
 	public PeerConfig(String hostName, int listeningPort, boolean hasFile)
 	{
@@ -14,7 +14,6 @@ public class PeerConfig {
 		this.listeningPort = listeningPort;
 		this.hasCompleteFile = hasFile;
 	}
-
 	public String getHostName()
 	{
 		return hostName;
@@ -30,19 +29,5 @@ public class PeerConfig {
 		return hasCompleteFile;
 	}
 
-	protected void setHostName(String hostName)	// no use
-	{
-		this.hostName = hostName;
-	}
-
-	protected void setListeningPort(int listeningPort)
-	{
-		this.listeningPort = listeningPort;
-	}
-
-	protected void setHasFile(boolean hasFile)
-	{
-		this.hasCompleteFile = hasFile;
-	}
 }
 

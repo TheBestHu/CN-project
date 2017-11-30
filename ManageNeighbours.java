@@ -23,7 +23,6 @@ public class ManageNeighbours implements Runnable
 			e.printStackTrace();
 		} 
 	}
-
 	/**
 	 * calculate download rate for all peers that are receiving data at the moment
 	 * retain two best uploaders

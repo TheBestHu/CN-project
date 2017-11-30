@@ -21,7 +21,7 @@ public class BitMap
 
 	public BitMap(int myPeerID, CommonConfig myCommonConfig, Set<Integer> peerConfigIDs,
 			boolean doIHaveFile, Connection myConnection,Map<Integer,PeerConfig> map) throws IOException
-			{
+	{
 
 		this.myConnection = myConnection;
 		this.myPeerID = myPeerID;
@@ -29,16 +29,17 @@ public class BitMap
 		this.peerIDtoPiece = new ConcurrentHashMap<Integer, byte[]>();
 		this.peerIDtoCountDownload = new ConcurrentHashMap<Integer, AtomicInteger>();
 		this.piecesAskedfor = new ConcurrentSkipListSet<Integer>();
-		this.totalPiecesRequired = (int)Math.ceil((double)myCommonConfig.getFileSize() / myCommonConfig.getPieceSize());
-		int totalBytesRequiredForPieces = (int)Math.ceil((double)totalPiecesRequired / 8);
+		this.totalPiecesRequired = Utilities.ceilDivide(myCommonConfig.getFileSize(), myCommonConfig.getPieceSize()); //xhw
+		//(int)Math.ceil((double)myCommonConfig.getFileSize() / myCommonConfig.getPieceSize());
+
+		int totalBytesRequiredForPieces = Utilities.ceilDivide(totalPiecesRequired,8); //xhw
+		//(int)Math.ceil((double)totalPiecesRequired / 8);
 
 		//initialize maps with all peerIDs (including mine) and 0s in value field
 		for(Integer PeerID : peerConfigIDs)
 		{
 			this.peerIDtoPiece.put(PeerID, new byte[totalBytesRequiredForPieces]);
 			this.peerIDtoCountDownload.put(PeerID, new AtomicInteger(0));
-
-
 		}
 		this.myDirectory = System.getProperty("user.dir") + "/peer_" + myPeerID;
 
@@ -57,7 +58,7 @@ public class BitMap
 		}
 		else
 		{
-			// check first if file actually exists or not
+/*			// check first if file actually exists or not
 			System.out.println(myDirectory);
 
 			File tempFile = new File(myDirectory + "/" + myCommonConfig.getFileName());
@@ -73,18 +74,20 @@ public class BitMap
 				System.out.println("FATAL filesize");
 				System.exit(0);
 			}
-
+*/
 			this.peerIDtoPiece.put(myPeerID, this.fullBitMap);
 
 		}
 		System.out.println("BitMap created");
-			}
+	}
 
 	private byte[] getfullBitMap(int totalPiecesRequired)
 	{
-		showBitMap();
+		// showBitMap();
 		//add 1 to all of bits in fullBitMap
-		int len = (int)Math.ceil((double)totalPiecesRequired/8);
+		int len = Utilities.ceilDivide(totalPiecesRequired,8);
+		//(int)Math.ceil((double)totalPiecesRequired/8);
+
 		byte[] fullBitMap = new byte[len];
 		for(int i = 0; i < len; i++)
 		{
@@ -93,6 +96,7 @@ public class BitMap
 		int lastBytePieces = totalPiecesRequired & 7;   //totalPiecesRequired & 7 = totalPiecesRequired % 8
 		if(lastBytePieces > 0)  //then zero-filling is required
 		{
+			//fullBitMap[len - 1] = (byte)(0xFF&0xFF >>> (8 - lastBytePieces));
 			fullBitMap[len - 1] = (byte)(fullBitMap[len - 1]&0xFF >>> (8 - lastBytePieces));
 		}
 		return fullBitMap;
@@ -114,9 +118,8 @@ public class BitMap
 			byte[] myFileBitMap = this.peerIDtoPiece.get(myPeerID);
 			this.updateBitMapWithPiece(myFileBitMap, pieceID);
 			this.peerIDtoCountDownload.get(myPeerID).addAndGet(1);  
-			findBits(myPeerID);
+			// findBits(myPeerID);
 		}
-
 
 		if(canIQuit())
 		{
@@ -124,16 +127,12 @@ public class BitMap
 			this.myConnection.QuitProcess();
 		}
 	}
-
+/*
 	private void showBitMap()
 	{
 		StringBuilder sb = new StringBuilder("Peer ");
-	/*	for(Integer a : this.peerIDtoPiece.keySet())
-		{
-			sb.append(a + ": " + this.peerIDtoPiece.get(a)[0] + "\n");
-		}*/
 	}
-
+*/
 	/**
 	 * getters setters for piecedata
 	 * @param pieceIndex
@@ -194,7 +193,6 @@ public class BitMap
 			this.peerIDtoCountDownload.get(peerID).addAndGet(1);
 		}
 	
-
 		if(canIQuit())
 		{
 			//signal Connection which will make every thread quit.
@@ -209,7 +207,6 @@ public class BitMap
 	 */
 	public boolean canIQuit()
 	{
-		
 		for(byte[] aBitMap : this.peerIDtoPiece.values())
 		{
 			if(!isBitMapFinal(aBitMap))
@@ -224,6 +221,13 @@ public class BitMap
 	private boolean isBitMapFinal(byte[] BitMap)
 	{
 		int len = BitMap.length;
+		for(int i=0;i<len;i++){
+			if(BitMap[i] != fullBitMap[i])
+				return false;
+		}
+		return true;
+	/*
+		int len = BitMap.length;
 		for(int i = 0; i < len; i++)
 		{
 			if((BitMap[i] ^ fullBitMap[i]) != 0)
@@ -232,6 +236,7 @@ public class BitMap
 			}
 		}
 		return true;
+	*/
 	}
 
 	/**
@@ -241,7 +246,7 @@ public class BitMap
 	 */
 	public boolean doIHavePiece(int pieceIndex)
 	{
-		showBitMap();
+		// showBitMap();
 		byte[] myFileBitMap = this.peerIDtoPiece.get(myPeerID);
 		int pieceLocation = pieceIndex / 8;
 		int bitLocation = pieceIndex & 7;   // = pieceIndex % 8
@@ -254,7 +259,7 @@ public class BitMap
 
 	private void updateBitMapWithPiece(byte[] peerFileBitMap, int pieceIndex)
 	{
-		showBitMap();
+		// showBitMap();
 		int pieceLocation = pieceIndex / 8;
 		int bitLocation = pieceIndex & 7;   // = pieceIndex % 8
 		peerFileBitMap[pieceLocation] |= (1 << bitLocation);
@@ -281,16 +286,31 @@ public class BitMap
 	 * @param anotherPeerID 
 	 * @return true if peer has any interesting piece, false, if no interesting piece 
 	 */
+
 	public boolean hasInterestingPiece(int anotherPeerID)
 	{
-		showBitMap();
+		// showBitMap();
 		byte[] myFileBitMap = this.peerIDtoPiece.get(myPeerID);
 		final int len = myFileBitMap.length;
 		byte[] peerFileBitMap = this.peerIDtoPiece.get(anotherPeerID);
-		findBits(anotherPeerID);
+		// findBits(anotherPeerID);
 		for(int i = 0; i < len; i++)
 		{
-			
+			if(myFileBitMap[i] != peerFileBitMap[i])
+				return true;
+		}
+		return false;
+	}
+/*
+	public boolean hasInterestingPiece(int anotherPeerID)
+	{
+		// showBitMap();
+		byte[] myFileBitMap = this.peerIDtoPiece.get(myPeerID);
+		final int len = myFileBitMap.length;
+		byte[] peerFileBitMap = this.peerIDtoPiece.get(anotherPeerID);
+		// findBits(anotherPeerID);
+		for(int i = 0; i < len; i++)
+		{
 			if((0xFF&(int)(myFileBitMap[i] | peerFileBitMap[i])) > (0xFF&(int)myFileBitMap[i]))
 			{
 				return true;
@@ -298,15 +318,7 @@ public class BitMap
 		}
 		return false;
 	}
-	
-	public void findBits(int peerID){
-		try{
-			showBitMap();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
-	}
+*/
 
 	/**
 	 * get any random piece not present with me but present in my connected peer
@@ -315,7 +327,7 @@ public class BitMap
 	 */
 	public int getPeerPieceIndex(int peerID)
 	{
-		showBitMap();
+		// showBitMap();
 		byte[] myFileBitMap = this.peerIDtoPiece.get(myPeerID);
 		int desiredPieceID = -1;        
 		//check the first available piece which is not requested, if found add to requested piece list
@@ -325,7 +337,7 @@ public class BitMap
 		
 		for(int i = 0; i < len; i++)
 		{
-			if((0xFF&(int)(myFileBitMap[i] | peerBitMap[i])) > (0xFF&(int)myFileBitMap[i]))
+			if(myFileBitMap[i] != peerBitMap[i])
 			{
 				for(int j = 0; j < 8; j++)
 				{
@@ -333,27 +345,30 @@ public class BitMap
 					if((myFileBitMap[i] & (1 << j)) == 0 && (peerBitMap[i] & (1 << j)) != 0)
 					{
 						int attemptedPieceIndex = i*8 + j;
-						desiredPieceID = findAndLogRequestedPiece(attemptedPieceIndex);
+						if(this.piecesAskedfor.contains(attemptedPieceIndex))
+							desiredPieceID = -1;
+						else
+							desiredPieceID = attemptedPieceIndex;
+
 						if (desiredPieceID != -1)
 							possiblePieces.add(desiredPieceID);
 					}
 				}
 			}
 		}
-		if (possiblePieces.size() != 0)
-		{
-			// generate a random number 0 and size of possiblePieces
+		if(possiblePieces.size() ==0){
+			return -1;
+		}
+		else{
 			Random rand = new Random();
 			int idx = rand.nextInt(possiblePieces.size());
-			
 			// access that element from the possiblePieces list and return
 			int pieceIndex = possiblePieces.get(idx);
 			this.piecesAskedfor.add(pieceIndex);
 			return pieceIndex;
 		}
-		return -1;
 	}
-
+/*
 	private synchronized int findAndLogRequestedPiece(int pieceIndex)
 	{
 		if(this.piecesAskedfor.contains(pieceIndex))
@@ -362,6 +377,6 @@ public class BitMap
 		}
 		return pieceIndex;
 	}
-
+*/
 	
 }

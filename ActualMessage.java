@@ -66,7 +66,6 @@ public class ActualMessage extends Message
 			this.MsgLength = (Utilities.getBytes(index)).length+1;
 		
 		//utilities.getBytes(pieceIndex) is payload for this message
-		
 			ByteArrayOutputStream baos = Utilities.getStreamHandle();
 			baos.write(Utilities.getBytes(this.MsgLength));
 			baos.write((byte)this.MsgTypeValue);

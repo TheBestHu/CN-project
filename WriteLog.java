@@ -1,6 +1,9 @@
 import java.io.*;
 import java.util.*;
 
+/**
+ * @Author Yebowen Hu
+ */
 public class WriteLog
 {
   //Creating a Log file named log_peer_[peerID].log if one doesnt exist

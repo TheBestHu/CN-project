@@ -16,8 +16,6 @@ public class ClientConnection implements Runnable
 	private PipedOutputStream pipedOutputStream = new PipedOutputStream();
 	private Connection myConnection;
 	WriteLog w = new WriteLog();
-
-
 	/**
 	 * Constructor for client connection using server address and server port
 	 * calls from peer whose clients are made
@@ -88,6 +86,13 @@ public class ClientConnection implements Runnable
 		dos.write(data);
 		dos.flush();
 	}
+// xhw
+	public void send(ActualMessage ActM) throws IOException
+	{
+		byte[] data = ActM.getFullMessage();
+		dos.write(data);
+		dos.flush();
+	}
 
 	/**
 	 * reception from stream through data Input Stream
@@ -141,9 +146,7 @@ public class ClientConnection implements Runnable
 				{
 					try
 					{
-						//clientBlocker();
 						System.out.println("close connections called");
-						//Runtime.getRuntime().exit(0);
 						Thread.yield();
 						this.closeConnections();
 						

@@ -25,8 +25,6 @@ public class Connection
 	private Map<Integer, PeerConfig> peerInfoMap;
 	private int myPeerID;
 	private String myHostName;
-
-
 	/**
 	 * constructor for connection
 	 * separatley makes servers and clients
@@ -38,7 +36,6 @@ public class Connection
 	 */
 	public Connection(CommonConfig myCommonConfig, Map<Integer, PeerConfig> peerMap, int myPeerID) throws IOException, InterruptedException
 	{
-
 		this.myCommonConfig = myCommonConfig;
 		PeerConfig myPeerConfig = peerMap.get(myPeerID);
 		this.myHostName = myPeerConfig.getHostName();
@@ -61,17 +58,14 @@ public class Connection
 		//begin connection
 		this.begin();
 	}
-
-	public void begin() throws SocketTimeoutException, IOException, InterruptedException
+////////delete socket timeout exception////////
+	public void begin() throws IOException, InterruptedException
 	{
 
 		Thread serverThread = new Thread(new ServerConnection(myHostName, myListenerPort, this));
 		serverThread.start();
-		findConnectionStatus();
 		this.myBitMap = new BitMap(myPeerID, myCommonConfig, peerInfoMap.keySet(), this.peerInfoMap.get(myPeerID).hasCompleteFile(), this,this.peerInfoMap);
-
 		this.processPeerInfoMap();
-
 		scheduler.scheduleAtFixedRate(new ManageNeighbours(this), 0, UNCHOKING_INTERVAL, TimeUnit.SECONDS);
 		scheduler.scheduleAtFixedRate(new ManageOptimisticNeighbours(this), 0, OPTIMISTIC_UNCHOKING_INTERVAL, TimeUnit.SECONDS);
 	}
@@ -82,19 +76,21 @@ public class Connection
 	 * @throws SocketTimeoutException
 	 * @throws IOException
 	 */
-	private void processPeerInfoMap() throws SocketTimeoutException, IOException
+	private void processPeerInfoMap() throws  IOException ///huye
 	{
-		for(Integer a : this.peerInfoMap.keySet())
-		{
-			if(a < myPeerID)
-			{
+		Set<Integer> set = this.peerInfoMap.keySet();
+		ArrayList<Integer> setList = new ArrayList<>(set);
+		int n = setList.size();
+		for (int i = 0 ; i<n;i++){
+			Integer a = setList.get(i);
+			if(a<myPeerID){
+				PeerConfig peerinfo = this.peerInfoMap.get(a);
 				System.out.println("Creating a client for " + myPeerID);
-
-				ClientConnection newClient = new ClientConnection(this.peerInfoMap.get(a).getHostName(),
-						this.peerInfoMap.get(a).getListeningPort(), this);
+				ClientConnection newClient = new ClientConnection(peerinfo.getHostName(),
+						peerinfo.getListeningPort(), this);
 				MessageHandler aMessageHandler = new MessageHandler(newClient, this);
 				(new Thread(aMessageHandler)).start();
-				findConnectionStatus();
+				//findConnectionStatus();
 				this.peerConnectionMap.put(a, newClient);
 			}
 		}
@@ -103,24 +99,16 @@ public class Connection
 
 	public void sendGroupMessage(List<Integer> peerIDList, byte[] data) throws IOException
 	{
-		for (Integer a : peerIDList)
-		{
-			if(this.peerConnectionMap.containsKey(a))
-			{
+		int i = peerIDList.size(); //huye
+		for(int n = 0; n< i;n++){
+			Integer a = peerIDList.get(n);
+			if(this.peerConnectionMap.containsKey(a)){
 				this.peerConnectionMap.get(a).send(data);
 			}
 		}
 	}
 
-	protected void checkAvailability(){
-		//Iterator<Integer> it = connectedPeersList.iterator();
-		//StringBuilder sb = new StringBuilder();
-		//while(it.hasNext()){
-		//	sb.append(true);
-		//}
-		int i;
 
-	}
 	
 	public void sendPeerMessage(int peerID, byte[] data) throws IOException
 	{
@@ -150,11 +138,7 @@ public class Connection
 	{
 		this.myInterestedNeighbours.remove(new Integer(peerID));
 	}
-	
-	public void findConnectionStatus(){
-		checkAvailability();
-	}
-	
+
 
 	/**
 	 * returns list of all the peers participating in file transfer
@@ -181,7 +165,6 @@ public class Connection
 	public synchronized void addOrUpdatedownloadrate_peer(Integer peerId, long elapsedTime)
 	{              
 		double downloadRate = (double)this.pieceSize/elapsedTime;
-		checkAvailability();
 		downloadrate_peer.put(peerId, downloadRate);
 	}
 
@@ -211,7 +194,6 @@ public class Connection
 	 */
 	public void reportChokedPeer(Integer peerID) throws IOException, InterruptedException
 	{
-		// this.sendPeerMessage(peerID, new ChokeMessage().getFullMessage());
 		this.sendPeerMessage(peerID, new ActualMessage(0).getFullMessage());
 		this.setofChokedPeers.add(peerID);
 	}
@@ -224,7 +206,6 @@ public class Connection
 	 */
 	public void reportUnchokedPeer(int peerID) throws IOException, InterruptedException
 	{
-		// this.sendPeerMessage(peerID, new UnchokedMessage().getFullMessage());
 		this.sendPeerMessage(peerID, new ActualMessage(1).getFullMessage());
 		this.setofChokedPeers.remove(peerID);
 	}
@@ -251,17 +232,12 @@ public class Connection
 
 	public void QuitProcess()
 	{
-		// Shutdown all the threads.
-		//System.out.println("Quit Process");
-		
-	      try{
-		//Thread.sleep(1000);
+		try{
 		Thread.yield();
  		}
 		catch(Exception e){
-			//e.printStackTrace();
-		}	
-              scheduler.shutdown();
+		}
+		scheduler.shutdown();
 	}
 }
 

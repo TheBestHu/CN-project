@@ -40,7 +40,7 @@ public class MessageHandler implements Runnable
 		try
 		{
 			this.sendHandshake(myID);
-			this.processHandshake(this.receiveHandshake());
+			//this.processHandshake(this.receiveHandshake());
 			myClient.setSoTimeout();            
 			(new Thread(myClient)).start();
 			this.processData();
@@ -50,7 +50,7 @@ public class MessageHandler implements Runnable
 			e.printStackTrace();
 		} 
 	}
-
+/*
 	private HandshakeMessage receiveHandshake() throws IOException
 	{
 		myClient.receive(32);
@@ -58,11 +58,29 @@ public class MessageHandler implements Runnable
 		dis.readFully(handshakeMsg);
 		return new HandshakeMessage(handshakeMsg);
 	}
+*/
 
 	private void sendHandshake(int myPeerID) throws IOException, InterruptedException
 	{
 		Message msg = new HandshakeMessage(myPeerID);
 		myClient.send(msg.getFullMessage());
+		myClient.receive(32);
+		byte[] handshakeMsg = new byte[32];
+		dis.readFully(handshakeMsg);
+		HandshakeMessage HSmessage = new HandshakeMessage(handshakeMsg);
+		byte [] msgBytes = HSmessage.getFullMessage();
+		byte [] msgHeader = new byte[18];
+		System.arraycopy(msgBytes, 0, msgHeader, 0, 18);
+		this.connectedToID = HSmessage.getPeerID();
+		this.myConnection.reportNewClientConnection(this.connectedToID, myClient);
+		w.ReceivedHandshake(myID, connectedToID);
+		if(myBitMap == null){
+			System.out.println("My file is NULL"); 
+		}
+		if(myBitMap.doIHaveAnyPiece())
+		{
+			myClient.send(new ActualMessage(5,myBitMap.getMyFileBitMap()).getFullMessage());
+		}
 	}
 
 	private void processData() throws IOException, InterruptedException
@@ -75,7 +93,34 @@ public class MessageHandler implements Runnable
 
 			int payloadLength = msg.getMsgLength() - 1;  //removing  the size of message type
 			// System.out.println("msg.getMsgTypeValue()" + msg.getMsgTypeValue());
-			switch(msg.getMsgTypeValue())
+			if(msg.getMsgType().equals("ChokeMessage"))
+				processChokeMessage();
+
+			else if(msg.getMsgType().equals("UnchokedMessage"))
+				processUnchokeMessage();
+
+			else if(msg.getMsgType().equals("InterestedMessage"))
+				processInterestedMessage();
+
+			else if(msg.getMsgType().equals("NotInterestedMessage"))
+				processNotInterestedMessage();
+
+			else if(msg.getMsgType().equals("HaveMessage"))
+				processHaveMessage();
+
+			else if(msg.getMsgType().equals("BitfieldMessage"))
+				processBitfieldMessage(payloadLength);
+
+			else if(msg.getMsgType().equals("RequestMessage"))
+				processRequestMessage();
+
+			else if(msg.getMsgType().equals("PieceMessage"))
+				processPieceMessage(payloadLength);
+
+			else
+				System.out.println("No such type of Message");
+			/*
+			switch(msg.getMsgType())
 			{
 			case 0:
 				// System.out.println("choke message received");
@@ -107,29 +152,46 @@ public class MessageHandler implements Runnable
 			default:
 				System.out.println("Undef error!!");
 			}
+			*/
 		}
 	}
 
 	/**
 	 * receives message and processes it if msg type value is 5
-	 * @param msgLength
+	 * @param msgLength = payloadLength
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
+	private int readIndex() throws IOException, InterruptedException
+	{
+		byte[] index = new byte[4];
+		dis.readFully(index);
+		return Utilities.getIntFromByte(index,0);
+	}
+	private byte[] readPayload(int length) throws IOException, InterruptedException
+	{
+		byte[] data = new byte[length];
+		dis.readFully(data);
+		return data;
+	}
+
 	private void processBitfieldMessage(int msgLength) throws IOException, InterruptedException
 	{
-		byte[] BitMap = new byte[msgLength];
-		dis.readFully(BitMap);
+		//byte[] BitMap = new byte[msgLength];
+		//dis.readFully(BitMap);
+
+		byte[] BitMap = readPayload(msgLength);
 		myBitMap.setPeerBitMap(connectedToID, BitMap);
 		if(myBitMap.hasInterestingPiece(connectedToID))
 		{
 			ActualMessage i = new ActualMessage(2);
 			//System.out.println("Interested MEssage type val = " + i.getMsgTypeValue());
-			myClient.send(i.getFullMessage());
+			//myClient.send(i.getFullMessage());
+			myClient.send(i);
 		}
 		else
 		{
-			myClient.send((new ActualMessage(3)).getFullMessage());
+			myClient.send((new ActualMessage(3)));
 		}
 	}
 
@@ -142,11 +204,16 @@ public class MessageHandler implements Runnable
 	 */
 	private void processPieceMessage(int msgLength) throws IOException, InterruptedException
 	{
+		/*
 		byte[] pieceBuffer = new byte[4];
 		dis.readFully(pieceBuffer);
 		int pieceIndex = Utilities.getIntFromByte(pieceBuffer, 0);
 		byte[] pieceData = new byte[msgLength - 4];  
 		dis.readFully(pieceData);
+		*/
+		int pieceIndex = readIndex();
+		byte[] pieceData = readPayload(msgLength-4);
+
 		stop_Download = System.currentTimeMillis();
 		myConnection.addOrUpdatedownloadrate_peer(connectedToID, (stop_Download - start_Download));
 		myBitMap.reportPieceReceived(pieceIndex, pieceData);
@@ -178,19 +245,22 @@ public class MessageHandler implements Runnable
 	 */
 	private void processRequestMessage() throws IOException, InterruptedException
 	{        
-		byte[] indexBuffer = new byte[4];
-		dis.readFully(indexBuffer);
-		int pieceIndex = Utilities.getIntFromByte(indexBuffer, 0);
+		//byte[] indexBuffer = new byte[4];
+		//dis.readFully(indexBuffer);
+		int pieceIndex = readIndex();
 		byte[] dataForPiece = myBitMap.getPieceData(pieceIndex);
 		// myClient.send((new PieceMessage(pieceIndex, dataForPiece)).getFullMessage());
 		myClient.send((new ActualMessage(7, pieceIndex, dataForPiece)).getFullMessage());
 	}
 
-	private void processHaveMessage(int msgLength) throws IOException, InterruptedException
+	private void processHaveMessage() throws IOException, InterruptedException
 	{
+		/*
 		byte[] payload = new byte[msgLength];
 		dis.readFully(payload);
 		int pieceIndex = Utilities.getIntFromByte(payload, 0);
+		*/
+		int pieceIndex = readIndex();
 		w.Have(Integer.toString(myID), Integer.toString(connectedToID),pieceIndex );
 
 		myBitMap.reportPeerPieceAvailablity(connectedToID, pieceIndex);
@@ -203,7 +273,6 @@ public class MessageHandler implements Runnable
 
 	private void processNotInterestedMessage()
 	{
-
 		w.NotInterested(Integer.toString(myID), Integer.toString(connectedToID));
 		myConnection.reportNotInterestedPeer(connectedToID);
 	}
@@ -232,7 +301,7 @@ public class MessageHandler implements Runnable
 		this.isChoked = true;
 		myConnection.resetdownloadrate_peer(connectedToID);
 	}
-
+/*
 	private void processHandshake(HandshakeMessage handshakeMsg) throws IOException, InterruptedException
 	{
 		byte [] msgBytes = handshakeMsg.getFullMessage();
@@ -249,73 +318,30 @@ public class MessageHandler implements Runnable
 			myClient.send(new ActualMessage(5,myBitMap.getMyFileBitMap()).getFullMessage());
 		}
 	}
-
+*/
 	private Message getNextMessage() throws IOException, InterruptedException
 	{
+		/*
+		if(myBitMap.canIQuit())
+			this.myConnection.QuitProcess();
+		*/
 		byte[] lengthBuffer = new byte[4];
 		try{
-                dis.readFully(lengthBuffer);
+            dis.readFully(lengthBuffer);
 		}
 		catch(Exception e){
                 // System.out.println("Connection closed");
-                }
-                int msgLength = Utilities.getIntFromByte(lengthBuffer, 0);
+        }
+        int msgLength = Utilities.getIntFromByte(lengthBuffer, 0);
+        
+        
 		byte[] msgType = new byte[1];
 		
-                try{
-                dis.readFully(msgType);
+        try{
+            dis.readFully(msgType);
 		}
-                catch(Exception e){}
-                Message m = new Message();
-		m.setMsgLength(msgLength);
-		switch(msgType[0])
-		{
-		case 0:
-			//System.out.println("CHoke Message Received");
-			m.setMsgTypeValue(0);
-			m.setMsgType("ChokeMessage");
-			break;
-		case 1:
-			//System.out.println("UnCHoke Message Received");
-			m.setMsgTypeValue(1);
-			m.setMsgType("UnchokedMessage");
-			break;
-		case 2:
-			//System.out.println("Interested Message Received");
-
-			m.setMsgTypeValue(2);
-			m.setMsgType("InterestedMessage");
-			break;
-		case 3:
-			//System.out.println("Not Interested Message");
-			m.setMsgTypeValue(3);
-			m.setMsgType("NotInterestedMessage");
-			break;
-		case 4:
-			//System.out.println("Have Message Received");
-			m.setMsgTypeValue(4);
-			m.setMsgType("HaveMessage");
-			break;
-		case 5:
-
-			//System.out.println("Bitfield message received");
-			m.setMsgTypeValue(5);
-			m.setMsgType("BitfieldMessage");
-			break;
-		case 6:
-			//System.out.println("request Message Received");
-			m.setMsgTypeValue(6);
-			m.setMsgType("RequestMessage");
-			break;
-		case 7:
-			//System.out.println("Piece Message Received");
-			m.setMsgTypeValue(7);
-			m.setMsgType("PieceMessage");
-			break;
-		default:
-			System.out.println("Undefined Message!!!");
-		}
-
+        catch(Exception e){}
+        Message m = new Message(msgType[0],msgLength);
 		return m;
 	}
 
@@ -326,13 +352,36 @@ public class MessageHandler implements Runnable
 			int desiredPiece = myBitMap.getPeerPieceIndex(connectedToID);
 			if(desiredPiece != -1)
 			{
-				myClient.send((new ActualMessage(6,desiredPiece)).getFullMessage());
+				myClient.send((new ActualMessage(6,desiredPiece)));
 			}
 		}
 
 		@Override
 		public void run()
 		{
+			while(true){
+				if(myBitMap.canIQuit()){
+					try{
+						Thread.sleep(1000);
+						break;
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
+				try
+				{
+					this.sendRequestMessage();
+					Thread.sleep(5);
+				} 
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				} 
+
+			}
+			/*
 			while(! myBitMap.canIQuit())
 			{
 				try
@@ -344,6 +393,7 @@ public class MessageHandler implements Runnable
 					e.printStackTrace();
 				} 
 			}
+			*/
 		}
 	}
 }

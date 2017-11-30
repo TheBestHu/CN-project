@@ -11,12 +11,6 @@ public class Utilities {
 	private static Condition borrowedStream = lock.newCondition();
 	private static boolean isStreamInUse = false;
 
-	public static byte[] intToBytes( int i ) {
-		ByteBuffer bb = ByteBuffer.allocate(4); 
-		bb.putInt(i); 
-		return bb.array();
-	}
-
 	public static byte[] getBytes(int i)
 	{
 		byte[] result = new byte[4];
@@ -26,14 +20,6 @@ public class Utilities {
 		result[3] = (byte) (i /*>> 0*/);
 
 		return result;
-	}
-
-	public static int byteArrayToInt(byte[] b) 
-	{
-		return   b[3] & 0xFF |
-				(b[2] & 0xFF) << 8 |
-				(b[1] & 0xFF) << 16 |
-				(b[0] & 0xFF) << 24;
 	}
 
 	public static int getIntFromByte(byte[] array, int index){
@@ -73,6 +59,13 @@ public class Utilities {
 			lock.unlock();
 		}
 	}
+
+	public static int ceilDivide(int dividend, int divisor)
+    {
+        int result;
+        result = dividend / divisor;
+        return result * divisor == dividend ? result : result + 1;
+    }
 
 }
 

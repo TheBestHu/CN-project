@@ -40,9 +40,9 @@ public class Connection
 	{
 
 		this.myCommonConfig = myCommonConfig;
-		PeerConfig myConfig = peerMap.get(myPeerID);
-		this.myHostName = myConfig.getHostName();
-		this.myListenerPort = myConfig.getListeningPort();
+		PeerConfig myPeerConfig = peerMap.get(myPeerID);
+		this.myHostName = myPeerConfig.getHostName();
+		this.myListenerPort = myPeerConfig.getListeningPort();
 		System.out.println("My host name = " + myHostName + " and my listening port is " + myListenerPort);
 
 		this.pieceSize = myCommonConfig.getPieceSize();
@@ -211,7 +211,8 @@ public class Connection
 	 */
 	public void reportChokedPeer(Integer peerID) throws IOException, InterruptedException
 	{
-		this.sendPeerMessage(peerID, new ChokeMessage().getFullMessage());
+		// this.sendPeerMessage(peerID, new ChokeMessage().getFullMessage());
+		this.sendPeerMessage(peerID, new ActualMessage(0).getFullMessage());
 		this.setofChokedPeers.add(peerID);
 	}
 
@@ -223,7 +224,8 @@ public class Connection
 	 */
 	public void reportUnchokedPeer(int peerID) throws IOException, InterruptedException
 	{
-		this.sendPeerMessage(peerID, new UnchokedMessage().getFullMessage());
+		// this.sendPeerMessage(peerID, new UnchokedMessage().getFullMessage());
+		this.sendPeerMessage(peerID, new ActualMessage(1).getFullMessage());
 		this.setofChokedPeers.remove(peerID);
 	}
 

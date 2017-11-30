@@ -63,7 +63,6 @@ public class MessageHandler implements Runnable
 	{
 		Message msg = new HandshakeMessage(myPeerID);
 		myClient.send(msg.getFullMessage());
-
 	}
 
 	private void processData() throws IOException, InterruptedException
@@ -124,13 +123,13 @@ public class MessageHandler implements Runnable
 		myBitMap.setPeerBitMap(connectedToID, BitMap);
 		if(myBitMap.hasInterestingPiece(connectedToID))
 		{
-			InterestedMessage i = new InterestedMessage();
+			ActualMessage i = new ActualMessage(2);
 			//System.out.println("Interested MEssage type val = " + i.getMsgTypeValue());
 			myClient.send(i.getFullMessage());
 		}
 		else
 		{
-			myClient.send((new NotInterestedMessage()).getFullMessage());
+			myClient.send((new ActualMessage(3)).getFullMessage());
 		}
 	}
 
@@ -156,7 +155,7 @@ public class MessageHandler implements Runnable
 		if (myBitMap.getDownloadedPieceCount(myID) == myBitMap.getTotalPieceCount())
 		{
 			w.DownloadComplete(Integer.toString(myID));
-			myConnection.sendGroupMessage(myConnection.getconnectedPeersList(), new NotInterestedMessage().getFullMessage());
+			myConnection.sendGroupMessage(myConnection.getconnectedPeersList(), new ActualMessage(3).getFullMessage());
 		}
 
 		if(!isChoked)
@@ -164,12 +163,12 @@ public class MessageHandler implements Runnable
 			int desiredPiece = myBitMap.getPeerPieceIndex(connectedToID);
 			if(desiredPiece != -1)
 			{
-				myClient.send((new RequestMessage(desiredPiece)).getFullMessage());
+				myClient.send((new ActualMessage(6,desiredPiece)).getFullMessage());
 			}
 		}
 
-		myConnection.sendGroupMessage(myConnection.getconnectedPeersList(), (new HaveMessage(pieceIndex)).getFullMessage());
-		myConnection.sendGroupMessage(myConnection.computeAndGetWastePeersList(), new NotInterestedMessage().getFullMessage());
+		myConnection.sendGroupMessage(myConnection.getconnectedPeersList(), (new ActualMessage(4,pieceIndex)).getFullMessage());
+		myConnection.sendGroupMessage(myConnection.computeAndGetWastePeersList(), new ActualMessage(3).getFullMessage());
 	}
 
 	/**
@@ -183,7 +182,8 @@ public class MessageHandler implements Runnable
 		dis.readFully(indexBuffer);
 		int pieceIndex = Utilities.getIntFromByte(indexBuffer, 0);
 		byte[] dataForPiece = myBitMap.getPieceData(pieceIndex);
-		myClient.send((new PieceMessage(pieceIndex, dataForPiece)).getFullMessage());
+		// myClient.send((new PieceMessage(pieceIndex, dataForPiece)).getFullMessage());
+		myClient.send((new ActualMessage(7, pieceIndex, dataForPiece)).getFullMessage());
 	}
 
 	private void processHaveMessage(int msgLength) throws IOException, InterruptedException
@@ -197,7 +197,7 @@ public class MessageHandler implements Runnable
 		if(!myBitMap.doIHavePiece(pieceIndex))
 		{
 			myConnection.reportInterestedPeer(connectedToID);
-			myClient.send((new InterestedMessage()).getFullMessage());
+			myClient.send((new ActualMessage(2)).getFullMessage());
 		}
 	}
 
@@ -246,7 +246,7 @@ public class MessageHandler implements Runnable
 		}
 		if(myBitMap.doIHaveAnyPiece())
 		{
-			myClient.send(new BitfieldMessage(myBitMap.getMyFileBitMap()).getFullMessage());
+			myClient.send(new ActualMessage(5,myBitMap.getMyFileBitMap()).getFullMessage());
 		}
 	}
 
@@ -326,7 +326,7 @@ public class MessageHandler implements Runnable
 			int desiredPiece = myBitMap.getPeerPieceIndex(connectedToID);
 			if(desiredPiece != -1)
 			{
-				myClient.send((new RequestMessage(desiredPiece)).getFullMessage());
+				myClient.send((new ActualMessage(6,desiredPiece)).getFullMessage());
 			}
 		}
 

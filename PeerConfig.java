@@ -30,7 +30,7 @@ public class PeerConfig {
 		return hasCompleteFile;
 	}
 
-	protected void setHostName(String hostName)
+	protected void setHostName(String hostName)	// no use
 	{
 		this.hostName = hostName;
 	}

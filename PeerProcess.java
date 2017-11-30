@@ -75,7 +75,7 @@ public class PeerProcess
 				String[] tokens = st.split(" ");
 
 				if(tokens[3].equals("1")) b= true;
-				map.put(Integer.parseInt(tokens[0]), new PeerConfig(tokens[1], Integer.parseInt(tokens[2]), b));
+				map.put(Integer.parseInt(tokens[0]), new PeerConfig(tokens[1], Integer.parseInt(tokens[2]), b)); // <index, (hostname,port,hasfile)>
 
 			}
 			br.close();
@@ -93,7 +93,7 @@ public class PeerProcess
 	 * @throws IOException
 	 */
 	public void startAllPeers(CommonConfig com, Map<Integer,PeerConfig> map, Integer myPeerID){
-		Set<Integer> s = map.keySet();
+		Set<Integer> s = map.keySet();	// all peer indexes
 		ArrayList<Integer> myList = new ArrayList<Integer>(s);
 		
 		Iterator<Integer> it = myList.iterator();
@@ -115,7 +115,7 @@ public class PeerProcess
 	
 	public static void main(String []args) throws IOException 
 	{
-		Integer myPeerID = Integer.parseInt(args[0]);
+		Integer myPeerID = Integer.parseInt(args[0]);	// read in my peerID
 		PeerProcess p = new PeerProcess();
 		CommonConfig config = p.getCommon("Common.cfg");
 		Map<Integer,PeerConfig> map = p.getPeerInfo("PeerInfo.cfg");

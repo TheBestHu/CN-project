@@ -1,23 +1,25 @@
 
-
-public class PeerConfig {
+/**
+ * @author Huanwen Xu,Yajing Fang and Yebowen Hu
+ */
+public class PeerCon {
 
 	private String hostName;
 	private int listeningPort;
 	private boolean hasCompleteFile;
 
-	public PeerConfig(String hostName, int listeningPort, boolean hasFile)
+	public PeerCon(String hostName, int listeningPort, boolean hasFile)
 	{
 		this.hostName = hostName;
 		this.listeningPort = listeningPort;
 		this.hasCompleteFile = hasFile;
 	}
-	public String getHostName()
+	public String FindHostInfo()
 	{
 		return hostName;
 	}
 
-	public int getListeningPort()
+	public int FindPortNumber()
 	{
 		return listeningPort;
 	}

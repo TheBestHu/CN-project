@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * @Author Yebowen Hu
+ * @author Huanwen Xu,Yajing Fang and Yebowen Hu
  */
 public class WriteLog
 {
@@ -22,10 +22,14 @@ public class WriteLog
           bw.newLine();
           bw.close();
       }catch (IOException a) {
-          // a.printStackTrace();
       }
   }
 
+    /**
+     *
+     * @param peer1
+     * @param peer2
+     */
   //Writing Log for Incoming TCP connection from Peer 2 to peer 1
   public void TcpConnectionIncoming(String peer1, String peer2)
   {        
@@ -37,7 +41,13 @@ public class WriteLog
             String operation = " is connected from Peer ";
             WriteLine(filename,peer1,operation,peer2);
  }
-  
+
+    /**
+     *
+     * @param peer1
+     * @param address
+     * @param port
+     */
   
   public void ServerConnectionIncoming(String peer1, String address, String port)
   {        
@@ -61,6 +71,11 @@ public class WriteLog
             WriteLine(filename, peer1,operation, peer2);
   }
 
+    /**
+     *
+     * @param peer1
+     * @param prefPeerList
+     */
   
   public void PrefNeighbours(String peer1, String prefPeerList)
   {
@@ -73,6 +88,12 @@ public class WriteLog
             String operation  = " has the preferred neighbours ";
             WriteLine(filename,peer1,operation,prefPeerList);
 }
+
+    /**
+     *
+     * @param peer1
+     * @param peer2
+     */
   
   public void OptUnchokedNeighbours(String peer1, String peer2)
   {
@@ -145,7 +166,7 @@ public class WriteLog
       WriteLine(filename, peer1, operation, peer2);
   }
   
-  public void PieceDownload(String peer1, String peer2, int index, int pieces)
+  public void PD(String peer1, String peer2, int index, int pieces)
   {
 	  String filename = "peer_" + peer1+"/log_peer_"+peer1+".log";
             File file = new File(filename);
@@ -158,7 +179,7 @@ public class WriteLog
       WriteLine(filename, peer1, operation,num);
   }
   
-  public void DownloadComplete(String peer1)
+  public void DC(String peer1)
   {
 	  String filename = "peer_" + peer1+"/log_peer_"+peer1+".log";
 	  String operation = " has downloaded the complete file";
@@ -168,7 +189,7 @@ public class WriteLog
   
   ///*****************************log handshake message begin*****************************************
   
-  public void ReceivedHandshake(int peer1, int peer2)
+  public void GetHandshakeMessage(int peer1, int peer2)
   {
       String filename = "peer_" + peer1+"/log_peer_"+peer1+".log";
       File file = new File(filename);
@@ -193,7 +214,6 @@ public class WriteLog
             bw.newLine();
             bw.close();
         }catch(IOException ioe){
-            // ioe.printStackTrace();
         }
     }
 

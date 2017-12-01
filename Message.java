@@ -1,101 +1,65 @@
 import java.io.Serializable;
 
 /**
- * Message should be serialized
- * has message type value and full payload message
- *
+ * @author Huanwen Xu,Yajing Fang and Yebowen Hu
  */
+
 public class Message implements Serializable 
 {
 	protected static final long serialVersionUID = 1L;
-	String MsgType;
-	int MsgLength;
+	String TheTypeOfMessages;
+	int TheLengthOfMessages;
 	byte[] FullMessage;
-	int MsgTypeValue;
+	int TheTypeValueOfMessages;
 	Message()
 	{
 	}
 	Message(int type, int length)
 	{
-		this.MsgTypeValue = type;
-		this.MsgLength = length;
+		this.TheTypeValueOfMessages = type;
+		this.TheLengthOfMessages = length;
 		switch(type)
 		{
 		case 0:
-			//System.out.println("CHoke Message Received");
-			this.MsgType="ChokeMessage";
+			this.TheTypeOfMessages ="ChokeMessage";
 			break;
 		case 1:
-			//System.out.println("UnCHoke Message Received");
-			this.MsgType="UnchokedMessage";
+			this.TheTypeOfMessages ="UnchokedMessage";
 			break;
 		case 2:
-			//System.out.println("Interested Message Received");
-			this.MsgType="InterestedMessage";
+			this.TheTypeOfMessages ="InterestedMessage";
 			break;
 		case 3:
-			//System.out.println("Not Interested Message");
-			this.MsgType="NotInterestedMessage";
+			this.TheTypeOfMessages ="NotInterestedMessage";
 			break;
 		case 4:
-			//System.out.println("Have Message Received");
-			this.MsgType="HaveMessage";
+			this.TheTypeOfMessages ="HaveMessage";
 			break;
 		case 5:
 
-			//System.out.println("Bitfield message received");
-			this.MsgType="BitfieldMessage";
+			this.TheTypeOfMessages ="BitfieldMessage";
 			break;
 		case 6:
-			//System.out.println("request Message Received");
-			this.MsgType="RequestMessage";
+			this.TheTypeOfMessages ="RequestMessage";
 			break;
 		case 7:
-			//System.out.println("Piece Message Received");
-			this.MsgType="PieceMessage";
+			this.TheTypeOfMessages ="PieceMessage";
 			break;
 		default:
 			System.out.println("Undefined Message!!!");
 		}
 	}
+    public String getTheTypeOfMessages()
+    {
+        return TheTypeOfMessages;
+    }
+    public int getTheLengthOfMessages()
+    {
+        return TheLengthOfMessages;
+    }
+    public byte[] getFullMessage()
+    {
+        return FullMessage;
+    }
 
-	public int getMsgTypeValue()
-	{
-		return MsgTypeValue;
-	}
-
-	public void setMsgTypeValue(int msgVal)
-	{
-		this.MsgTypeValue = msgVal;
-	}
-
-	public String getMsgType()
-	{
-		return MsgType;
-	}
-
-	public void setMsgType(String msg)
-	{
-		this.MsgType = msg;
-	}
-
-	public int getMsgLength()
-	{
-		return MsgLength;
-	}
-
-	public void setMsgLength(int msglen)
-	{
-		this.MsgLength = msglen;
-	}
-
-	public byte[] getFullMessage()
-	{
-		return FullMessage;
-	}
-
-	public void setFullMessage(byte[] pack)
-	{
-		this.FullMessage = pack;
-	}
 }

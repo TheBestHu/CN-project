@@ -1,13 +1,15 @@
 import java.io.IOException;
 import java.util.*;
-
-public class ManageNeighbours implements Runnable
+/**
+ * @author Huanwen Xu,Yajing Fang and Yebowen Hu
+ */
+public class Neighbours implements Runnable
 {
-	private Connection myConnection;
+	private connect myConnection;
 	private Set<Integer> PrepreferredPeerIDSet;
 	WriteLog w = new WriteLog();
 
-	public ManageNeighbours(Connection myConnection)
+	public Neighbours(connect myConnection)
 	{
 		this.myConnection = myConnection;
 		this.PrepreferredPeerIDSet= new TreeSet<Integer>();
@@ -21,24 +23,18 @@ public class ManageNeighbours implements Runnable
 			findNeighbours();
 		} catch (Exception e)
 		{
-			//e.printStackTrace();
-		} 
+		}
 	}
-	/**
-	 * calculate download rate for all peers that are receiving data at the moment
-	 * retain two best uploaders
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
+
 	private void findNeighbours() throws IOException, InterruptedException
 	{
 		List<double[]> peerDownloadRatesList = new ArrayList<double[]>();
-		Set<Integer> interestedNeighborsList = myConnection.getmyInterestedNeighbours();
+		Set<Integer> interestedNeighborsList = myConnection.getmyIN();
 		for(Integer peerID : interestedNeighborsList)
 		{
 			double[] peerIDAndRatePair = new double[2];
 			peerIDAndRatePair[0] = (double)peerID;
-			peerIDAndRatePair[1] = myConnection.getDownloadRate(peerID);
+			peerIDAndRatePair[1] = myConnection.detectTheRateOfDownload(peerID);
 			peerDownloadRatesList.add(peerIDAndRatePair);
 		}
 		Collections.sort(peerDownloadRatesList, new Comparator<double[]>()
@@ -57,8 +53,6 @@ public class ManageNeighbours implements Runnable
 		);
 
 		Set<Integer> CurrentPreferred = new TreeSet<Integer>();
-		//int count = peerDownloadRatesList.size() < myConnection.NUM_PREFERRED_NEIGHBORS ?
-		//		peerDownloadRatesList.size() : myConnection.NUM_PREFERRED_NEIGHBORS;
 
 		int count = Math.min(peerDownloadRatesList.size(), myConnection.NUM_PREFERRED_NEIGHBORS);
 				for(int i = 0; i < count; i++)
@@ -69,17 +63,16 @@ public class ManageNeighbours implements Runnable
 
 				for(Integer peerID : CurrentPreferred){
 					if(!PrepreferredPeerIDSet.contains(peerID))
-						myConnection.reportUnchokedPeer(peerID);
+						myConnection.findUnchokedPeer(peerID);
 				}
 
 				for(Integer peerID : this.PrepreferredPeerIDSet)
 				{
 					if(!CurrentPreferred.contains(peerID))
-						myConnection.reportChokedPeer(peerID);
+						myConnection.findChokedPeer(peerID);
 					
 				}
 
-				//this.PrepreferredPeerIDSet = CurrentPreferred;
 
 				if(CurrentPreferred.size() > 0)
 				{
@@ -90,7 +83,7 @@ public class ManageNeighbours implements Runnable
 						sb.append(",");
 					}
 					sb.deleteCharAt(sb.length()-1);
-					w.PrefNeighbours(Integer.toString(myConnection.getMyPeerID()), sb.toString());
+					w.PrefNeighbours(myConnection.getID(), sb.toString());
 				}
 				this.PrepreferredPeerIDSet = CurrentPreferred;
 	}

@@ -2,10 +2,8 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
 /**
- * Used for handshaking
- *
+ * @author Huanwen Xu,Yajing Fang and Yebowen Hu
  */
 public class HandshakeMessage extends Message 
 {
@@ -18,12 +16,7 @@ public class HandshakeMessage extends Message
 	{
 		return peerID;
 	}
-	
-	/**
-	 * @param peerid
-	 * @throws InterruptedException
-	 * @throws IOException
-	 */
+
 	public HandshakeMessage(int peerid) throws InterruptedException, IOException
 	{		
 		ByteArrayOutputStream baos = getStreamHandle();
@@ -32,13 +25,10 @@ public class HandshakeMessage extends Message
         this.peerID = peerid;
         baos.write(getBytes(peerID));
         this.FullMessage = baos.toByteArray();
-        returnStreamHandle();
+        reportTheHandler();
     }
 	
-	/**
-	 * Create handshake message when received.
-	 * @param HandShakeMsg
-	 */
+
 	public HandshakeMessage(byte[] HandShakeMsg)
 	{
 		this.FullMessage = HandShakeMsg;
@@ -56,7 +46,6 @@ public class HandshakeMessage extends Message
 		}
 		return result;
 	}
-
 	private static ByteArrayOutputStream streamHandle = new ByteArrayOutputStream();
 	private static ReentrantLock lock = new ReentrantLock();
 	private static Condition borrowedStream = lock.newCondition();
@@ -80,7 +69,7 @@ public class HandshakeMessage extends Message
 			lock.unlock();
 		}
 	}
-	private static void returnStreamHandle()
+	private static void reportTheHandler()
 	{
 		lock.lock();
 		try

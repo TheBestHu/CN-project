@@ -1,121 +1,122 @@
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ActualMessage extends Message
-{	/*
-	Constructor for Message without payload
-	*/
-	public ActualMessage(int MsgType) throws InterruptedException, IOException
+/**
+ * @author Huanwen Xu,Yajing Fang and Yebowen Hu
+ */
+
+public class ActMessage extends Message
+{
+	public ActMessage(int MsgType) throws InterruptedException, IOException
 	{
 		if(MsgType == 0)
 		{
-			this.MsgType = "ChokeMessage";
-			this.MsgTypeValue = 0;
-			this.MsgLength = 1;
+			this.TheTypeOfMessages = "ChokeMessage";
+			this.TheTypeValueOfMessages = 0;
+			this.TheLengthOfMessages = 1;
 
 			ByteArrayOutputStream baos = getStreamHandle();
-			baos.write(getBytes(this.MsgLength));
-			baos.write((byte)this.MsgTypeValue);
+			baos.write(getBytes(this.TheLengthOfMessages));
+			baos.write((byte)this.TheTypeValueOfMessages);
 			FullMessage = baos.toByteArray();
 			returnStreamHandle();
 		}
 		else if(MsgType ==1)
 		{
-			this.MsgType = "UnchokedMessage";
-			this.MsgTypeValue = 1;
-			this.MsgLength = 1;
+			this.TheTypeOfMessages = "UnchokedMessage";
+			this.TheTypeValueOfMessages = 1;
+			this.TheLengthOfMessages = 1;
 
 			ByteArrayOutputStream baos = getStreamHandle();
-			baos.write(getBytes(this.MsgLength));
-			baos.write((byte)this.MsgTypeValue);
+			baos.write(getBytes(this.TheLengthOfMessages));
+			baos.write((byte)this.TheTypeValueOfMessages);
 			FullMessage = baos.toByteArray();
 			returnStreamHandle();
 		}
 		else if(MsgType == 2)
 		{
-			this.MsgType = "InterestedMessage";
-			this.MsgTypeValue = 2;
-			this.MsgLength = 1;
+			this.TheTypeOfMessages = "InterestedMessage";
+			this.TheTypeValueOfMessages = 2;
+			this.TheLengthOfMessages = 1;
 
 			ByteArrayOutputStream baos = getStreamHandle();
-			baos.write(getBytes(this.MsgLength));
-			baos.write((byte)this.MsgTypeValue);
+			baos.write(getBytes(this.TheLengthOfMessages));
+			baos.write((byte)this.TheTypeValueOfMessages);
 			FullMessage = baos.toByteArray();
 			returnStreamHandle();
 		}
 		else if(MsgType == 3)
 		{
-			this.MsgType = "NotInterestedMessage";
-			this.MsgTypeValue = 3;
-			this.MsgLength = 1;
+			this.TheTypeOfMessages = "NotInterestedMessage";
+			this.TheTypeValueOfMessages = 3;
+			this.TheLengthOfMessages = 1;
 
 			ByteArrayOutputStream baos = getStreamHandle();
-			baos.write(getBytes(this.MsgLength));
-			baos.write((byte)this.MsgTypeValue);
+			baos.write(getBytes(this.TheLengthOfMessages));
+			baos.write((byte)this.TheTypeValueOfMessages);
 			FullMessage = baos.toByteArray();
 			returnStreamHandle();
 		}
 	}
 
-	public ActualMessage(int MsgType, int index) throws InterruptedException, IOException
+	public ActMessage(int MsgType, int index) throws InterruptedException, IOException
 	{
 		if(MsgType == 4)
 		{
-			this.MsgType = "HaveMessage";
-			this.MsgTypeValue = 4;
-			this.MsgLength = (getBytes(index)).length+1;
+			this.TheTypeOfMessages = "HaveMessage";
+			this.TheTypeValueOfMessages = 4;
+			this.TheLengthOfMessages = (getBytes(index)).length+1;
 		
 		//utilities.getBytes(pieceIndex) is payload for this message
 			ByteArrayOutputStream baos = getStreamHandle();
-			baos.write(getBytes(this.MsgLength));
-			baos.write((byte)this.MsgTypeValue);
+			baos.write(getBytes(this.TheLengthOfMessages));
+			baos.write((byte)this.TheTypeValueOfMessages);
 			baos.write(getBytes(index));
 			FullMessage = baos.toByteArray();
 			returnStreamHandle();
 		}
 		else if(MsgType == 6)
 		{
-			this.MsgType = "RequestMessage";
-			this.MsgTypeValue = 6;
-			this.MsgLength = (getBytes(index)).length+1;
+			this.TheTypeOfMessages = "RequestMessage";
+			this.TheTypeValueOfMessages = 6;
+			this.TheLengthOfMessages = (getBytes(index)).length+1;
 		
 			//utilities.getBytes(pieceIndex) is payload for this message
 		
 			ByteArrayOutputStream baos = getStreamHandle();
-			baos.write(getBytes(this.MsgLength));
-			baos.write((byte)this.MsgTypeValue);
+			baos.write(getBytes(this.TheLengthOfMessages));
+			baos.write((byte)this.TheTypeValueOfMessages);
 			baos.write(getBytes(index));
 			FullMessage = baos.toByteArray();
 			returnStreamHandle();
 		}
 	}
 
-	public ActualMessage(int MsgType, byte[] bitfield) throws InterruptedException, IOException
+	public ActMessage(int MsgType, byte[] bitfield) throws InterruptedException, IOException
 	{
-		this.MsgType = "Bitfield Message";
-		this.MsgTypeValue = 5;
-		this.MsgLength = bitfield.length+1;
+		this.TheTypeOfMessages = "Bitfield Message";
+		this.TheTypeValueOfMessages = 5;
+		this.TheLengthOfMessages = bitfield.length+1;
 
 		ByteArrayOutputStream baos = getStreamHandle();
-		baos.write(getBytes(this.MsgLength));
-		baos.write((byte)this.MsgTypeValue);
+		baos.write(getBytes(this.TheLengthOfMessages));
+		baos.write((byte)this.TheTypeValueOfMessages);
 		baos.write(bitfield);
 		FullMessage = baos.toByteArray();
 		returnStreamHandle();
 	}
 
-	public ActualMessage(int MsgType, int index, byte[] data) throws InterruptedException, IOException
+	public ActMessage(int MsgType, int index, byte[] data) throws InterruptedException, IOException
 	{
 		if(MsgType == 7){
-			this.MsgType = "PieceMessage";
-			this.MsgTypeValue = 7;
-			this.MsgLength = data.length+4+1;
+			this.TheTypeOfMessages = "PieceMessage";
+			this.TheTypeValueOfMessages = 7;
+			this.TheLengthOfMessages = data.length+4+1;
 
 			ByteArrayOutputStream baos = getStreamHandle();
-			baos.write(getBytes(this.MsgLength));
-			baos.write((byte)this.MsgTypeValue);
+			baos.write(getBytes(this.TheLengthOfMessages));
+			baos.write((byte)this.TheTypeValueOfMessages);
 			baos.write(getBytes(index));
 			baos.write(data);
 			FullMessage = baos.toByteArray();
@@ -136,18 +137,18 @@ public class ActualMessage extends Message
 	private static ByteArrayOutputStream streamHandle = new ByteArrayOutputStream();
 	private static ReentrantLock lock = new ReentrantLock();
 	private static Condition borrowedStream = lock.newCondition();
-	private static boolean isStreamInUse = false;
+	private static boolean UsedStream = false;
 
 	private static synchronized ByteArrayOutputStream getStreamHandle() throws InterruptedException
 	{
 		lock.lock();
 		try
 		{
-			if(isStreamInUse)
+			if(UsedStream)
 			{
 				borrowedStream.await();
 			}
-			isStreamInUse = true;
+			UsedStream = true;
 			streamHandle.reset();
 			return streamHandle;
 		}
@@ -162,7 +163,7 @@ public class ActualMessage extends Message
         try
         {
             borrowedStream.signal();
-            isStreamInUse = false;
+            UsedStream = false;
         }
         finally
         {

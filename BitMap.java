@@ -29,10 +29,10 @@ public class BitMap
 		this.peerIDtoPiece = new ConcurrentHashMap<Integer, byte[]>();
 		this.peerIDtoCountDownload = new ConcurrentHashMap<Integer, AtomicInteger>();
 		this.piecesAskedfor = new ConcurrentSkipListSet<Integer>();
-		this.totalPiecesRequired = Utilities.ceilDivide(myCommonConfig.getFileSize(), myCommonConfig.getPieceSize()); //xhw
+		this.totalPiecesRequired = Divide(myCommonConfig.getFileSize(), myCommonConfig.getPieceSize()); //xhw
 		//(int)Math.ceil((double)myCommonConfig.getFileSize() / myCommonConfig.getPieceSize());
 
-		int totalBytesRequiredForPieces = Utilities.ceilDivide(totalPiecesRequired,8); //xhw
+		int totalBytesRequiredForPieces = Divide(totalPiecesRequired,8); //xhw
 		//(int)Math.ceil((double)totalPiecesRequired / 8);
 
 		//initialize maps with all peerIDs (including mine) and 0s in value field
@@ -58,34 +58,30 @@ public class BitMap
 		}
 		else
 		{
-/*			// check first if file actually exists or not
-			System.out.println(myDirectory);
-
-			File tempFile = new File(myDirectory + "/" + myCommonConfig.getFileName());
-			if (!tempFile.exists())
-			{	System.out.println("File name im looking for:: "+myCommonConfig.getFileName());
-				System.out.println("FATAL FNFv1");
-				System.exit(0);
-			}
-
-			// check if file size matches the file-size specified in Common.cfg
-			if (tempFile.length() != myCommonConfig.getFileSize())
-			{
-				System.out.println("FATAL filesize");
-				System.exit(0);
-			}
-*/
 			this.peerIDtoPiece.put(myPeerID, this.fullBitMap);
 
 		}
 		System.out.println("BitMap created");
 	}
 
+	private static int Divide(int dividend, int divisor)
+	{
+		int result;
+		result = dividend / divisor;
+		return result * divisor == dividend ? result : result + 1;
+	}
+
 	private byte[] getfullBitMap(int totalPiecesRequired)
 	{
-		// showBitMap();
 		//add 1 to all of bits in fullBitMap
-		int len = Utilities.ceilDivide(totalPiecesRequired,8);
+		int len;
+		int temp = totalPiecesRequired/8;
+		if(temp*8==totalPiecesRequired){
+			len = temp;
+		}
+		else{
+			len = temp+1;
+		}
 		//(int)Math.ceil((double)totalPiecesRequired/8);
 
 		byte[] fullBitMap = new byte[len];
@@ -96,7 +92,6 @@ public class BitMap
 		int lastBytePieces = totalPiecesRequired & 7;   //totalPiecesRequired & 7 = totalPiecesRequired % 8
 		if(lastBytePieces > 0)  //then zero-filling is required
 		{
-			//fullBitMap[len - 1] = (byte)(0xFF&0xFF >>> (8 - lastBytePieces));
 			fullBitMap[len - 1] = (byte)(fullBitMap[len - 1]&0xFF >>> (8 - lastBytePieces));
 		}
 		return fullBitMap;
@@ -123,9 +118,11 @@ public class BitMap
 
 		if(canIQuit())
 		{
+			System.out.println("quit from reportPieceReceived");
 			//signal Connection which will make every thread quit.
-			this.myConnection.QuitProcess();
+			//this.myConnection.QuitProcess();
 		}
+
 	}
 /*
 	private void showBitMap()
@@ -195,8 +192,9 @@ public class BitMap
 	
 		if(canIQuit())
 		{
+			System.out.println("quit from reportPeerPieceAvailablity");
 			//signal Connection which will make every thread quit.
-			this.myConnection.QuitProcess();
+			//this.myConnection.QuitProcess();
 		}
 	}
 

@@ -22,7 +22,7 @@ public class WriteLog
           bw.newLine();
           bw.close();
       }catch (IOException a) {
-          a.printStackTrace();
+          // a.printStackTrace();
       }
   }
 
@@ -193,7 +193,7 @@ public class WriteLog
             bw.newLine();
             bw.close();
         }catch(IOException ioe){
-            ioe.printStackTrace();
+            // ioe.printStackTrace();
         }
     }
 

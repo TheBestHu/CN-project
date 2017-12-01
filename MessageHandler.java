@@ -1,8 +1,8 @@
 import java.io.*;
+import java.nio.ByteBuffer;
 
 /**
  * used to handle messages that are received
- * @author Ankit Pankaj and Suryansh
  *
  */
 public class MessageHandler implements Runnable
@@ -47,7 +47,7 @@ public class MessageHandler implements Runnable
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			// e.printStackTrace();
 		} 
 	}
 /*
@@ -88,6 +88,10 @@ public class MessageHandler implements Runnable
 		//now always receive bytes and take action
 		while(true)
 		{
+			if(myBitMap.canIQuit()){
+				myConnection.QuitProcess();
+				break;
+			}
 			Message msg = getNextMessage();
 			//now interpret the message and take action
 
@@ -119,46 +123,12 @@ public class MessageHandler implements Runnable
 
 			else
 				System.out.println("No such type of Message");
-			/*
-			switch(msg.getMsgType())
-			{
-			case 0:
-				// System.out.println("choke message received");
-				processChokeMessage();
-				break;
-			case 1:
-				// System.out.println("unchoke message received");
-				processUnchokeMessage();
-				break;
-			case 2:
-				processInterestedMessage();
-				break;
-			case 3:
-				processNotInterestedMessage();
-				break;
-			case 4:
-				processHaveMessage(payloadLength);
-				break;
-			case 5:
-				processBitfieldMessage(payloadLength);
-				break;
-			case 6:
-				//System.out.println("message read now take action");
-				processRequestMessage();
-				break;
-			case 7:
-				processPieceMessage(payloadLength);
-				break;
-			default:
-				System.out.println("Undef error!!");
-			}
-			*/
+
 		}
 	}
 
 	/**
 	 * receives message and processes it if msg type value is 5
-	 * @param msgLength = payloadLength
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
@@ -166,7 +136,8 @@ public class MessageHandler implements Runnable
 	{
 		byte[] index = new byte[4];
 		dis.readFully(index);
-		return Utilities.getIntFromByte(index,0);
+		ByteBuffer buffer = ByteBuffer.wrap(index,0,4);
+		return buffer.getInt();
 	}
 	private byte[] readPayload(int length) throws IOException, InterruptedException
 	{
@@ -177,16 +148,13 @@ public class MessageHandler implements Runnable
 
 	private void processBitfieldMessage(int msgLength) throws IOException, InterruptedException
 	{
-		//byte[] BitMap = new byte[msgLength];
-		//dis.readFully(BitMap);
 
 		byte[] BitMap = readPayload(msgLength);
 		myBitMap.setPeerBitMap(connectedToID, BitMap);
 		if(myBitMap.hasInterestingPiece(connectedToID))
 		{
 			ActualMessage i = new ActualMessage(2);
-			//System.out.println("Interested MEssage type val = " + i.getMsgTypeValue());
-			//myClient.send(i.getFullMessage());
+
 			myClient.send(i);
 		}
 		else
@@ -198,7 +166,6 @@ public class MessageHandler implements Runnable
 	/**
 	 * process a piece message
 	 * checks if choked or unchoked and responds appropriately
-	 * @param msgLength
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
@@ -296,7 +263,12 @@ public class MessageHandler implements Runnable
 	}
 
 	private void processChokeMessage()
-	{
+	{	/*
+		if(myBitMap.canIQuit()){
+			System.out.println("quit from message handler");
+			this.myConnection.QuitProcess();
+		}
+		*/
 		w.Choked(Integer.toString(myID), Integer.toString(connectedToID));
 		this.isChoked = true;
 		myConnection.resetdownloadrate_peer(connectedToID);
@@ -332,7 +304,9 @@ public class MessageHandler implements Runnable
 		catch(Exception e){
                 // System.out.println("Connection closed");
         }
-        int msgLength = Utilities.getIntFromByte(lengthBuffer, 0);
+
+        ByteBuffer bf = ByteBuffer.wrap(lengthBuffer,0,4);
+        int msgLength = bf.getInt();
         
         
 		byte[] msgType = new byte[1];
@@ -362,12 +336,12 @@ public class MessageHandler implements Runnable
 			while(true){
 				if(myBitMap.canIQuit()){
 					try{
-						Thread.sleep(1000);
+						// Thread.sleep(1000);
 						break;
 					}
 					catch (Exception e)
 					{
-						e.printStackTrace();
+						break;//e.printStackTrace();
 					}
 				}
 				try
@@ -377,7 +351,7 @@ public class MessageHandler implements Runnable
 				} 
 				catch (Exception e)
 				{
-					e.printStackTrace();
+					break;//e.printStackTrace();
 				} 
 
 			}

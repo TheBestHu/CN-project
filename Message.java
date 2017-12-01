@@ -3,7 +3,6 @@ import java.io.Serializable;
 /**
  * Message should be serialized
  * has message type value and full payload message
- * @author Ankit Pankaj and Suryansh
  *
  */
 public class Message implements Serializable 

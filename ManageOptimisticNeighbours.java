@@ -19,7 +19,7 @@ public class ManageOptimisticNeighbours implements Runnable
 			this.optUnchokedPeer();
 		} catch (Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 		} 
 	}
 
@@ -31,7 +31,6 @@ public class ManageOptimisticNeighbours implements Runnable
 	 */
 	private void optUnchokedPeer() throws IOException, InterruptedException
 	{
-
 		Integer prevPeer = myConnection.getUnchokedPeer_Prev();
 		if (prevPeer != -1)
 			myConnection.reportChokedPeer(myConnection.getUnchokedPeer_Prev());

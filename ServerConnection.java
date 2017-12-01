@@ -22,7 +22,7 @@ public class ServerConnection implements Runnable
 			Thread.sleep(50);
 		}
 		catch(Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		System.out.println("Server socket ready to run");
 	}
@@ -51,12 +51,13 @@ public class ServerConnection implements Runnable
 					{
 						this.serverSocket.close();
 						break;
-					} catch (IOException e){}
+					} catch (IOException e){
+					}
 				}
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 	}

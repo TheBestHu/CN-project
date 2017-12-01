@@ -1,7 +1,5 @@
 
-/**
- * @author Yebowen Hu
- */
+
 public class PeerConfig {
 
 	private String hostName;

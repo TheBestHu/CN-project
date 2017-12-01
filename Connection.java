@@ -73,7 +73,6 @@ public class Connection
 	/**
 	 * take all the keys in a set from peerInfoMap
 	 * start client connections for peers whose value is less than connection.mypeerID
-	 * @throws SocketTimeoutException
 	 * @throws IOException
 	 */
 	private void processPeerInfoMap() throws  IOException ///huye
@@ -161,7 +160,6 @@ public class Connection
 		}
 		return wastePeersList;
 	}
-
 	public synchronized void addOrUpdatedownloadrate_peer(Integer peerId, long elapsedTime)
 	{              
 		double downloadRate = (double)this.pieceSize/elapsedTime;
@@ -233,7 +231,9 @@ public class Connection
 	public void QuitProcess()
 	{
 		try{
-		Thread.yield();
+		// Thread.sleep(3000);
+		// System.exit(0);
+			Thread.yield();
  		}
 		catch(Exception e){
 		}

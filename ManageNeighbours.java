@@ -4,23 +4,24 @@ import java.util.*;
 public class ManageNeighbours implements Runnable
 {
 	private Connection myConnection;
-	private Set<Integer> preferredPeerIDSet;
+	private Set<Integer> PrepreferredPeerIDSet;
 	WriteLog w = new WriteLog();
 
 	public ManageNeighbours(Connection myConnection)
 	{
 		this.myConnection = myConnection;
-		this.preferredPeerIDSet= new TreeSet<Integer>();
+		this.PrepreferredPeerIDSet= new TreeSet<Integer>();
 	}
 
 	public void run()
 	{
 		try
 		{
+			System.out.println("Changing Neighbours");
 			findNeighbours();
 		} catch (Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 		} 
 	}
 	/**
@@ -41,7 +42,7 @@ public class ManageNeighbours implements Runnable
 			peerDownloadRatesList.add(peerIDAndRatePair);
 		}
 		Collections.sort(peerDownloadRatesList, new Comparator<double[]>()
-				{
+		{
 			@Override
 			public int compare(double[] rate1, double[] rate2)
 			{
@@ -52,44 +53,46 @@ public class ManageNeighbours implements Runnable
 				else
 					return 0;
 			}
-				});
+		}
+		);
 
-		Set<Integer> SetPreferred = new TreeSet<Integer>();
-		int count = peerDownloadRatesList.size() < myConnection.NUM_PREFERRED_NEIGHBORS ?
-				peerDownloadRatesList.size() : myConnection.NUM_PREFERRED_NEIGHBORS;
+		Set<Integer> CurrentPreferred = new TreeSet<Integer>();
+		//int count = peerDownloadRatesList.size() < myConnection.NUM_PREFERRED_NEIGHBORS ?
+		//		peerDownloadRatesList.size() : myConnection.NUM_PREFERRED_NEIGHBORS;
 
-
+		int count = Math.min(peerDownloadRatesList.size(), myConnection.NUM_PREFERRED_NEIGHBORS);
 				for(int i = 0; i < count; i++)
 				{
 					int peerID = (int)peerDownloadRatesList.get(i)[0];
-					if(!preferredPeerIDSet.contains(peerID))
-					{
+					CurrentPreferred.add(peerID);
+				}
+
+				for(Integer peerID : CurrentPreferred){
+					if(!PrepreferredPeerIDSet.contains(peerID))
 						myConnection.reportUnchokedPeer(peerID);
-					}
-					SetPreferred.add(peerID);
 				}
 
-				for(Integer peerID : this.preferredPeerIDSet)
+				for(Integer peerID : this.PrepreferredPeerIDSet)
 				{
-					if(!SetPreferred.contains(peerID))
-					{
+					if(!CurrentPreferred.contains(peerID))
 						myConnection.reportChokedPeer(peerID);
-					}
+					
 				}
 
-				this.preferredPeerIDSet = SetPreferred;
+				//this.PrepreferredPeerIDSet = CurrentPreferred;
 
-				if(preferredPeerIDSet.size() > 0)
+				if(CurrentPreferred.size() > 0)
 				{
-					String makeList = "";
-					for(Integer peerID : this.preferredPeerIDSet)
+					StringBuilder sb = new StringBuilder();
+					for(Integer peerID : CurrentPreferred)
 					{
-						makeList += peerID;
-						makeList += ",";
+						sb.append(peerID);
+						sb.append(",");
 					}
-					String makeString = makeList.substring(0, makeList.length()-1);
-					w.PrefNeighbours(Integer.toString(myConnection.getMyPeerID()), makeString);
+					sb.deleteCharAt(sb.length()-1);
+					w.PrefNeighbours(Integer.toString(myConnection.getMyPeerID()), sb.toString());
 				}
+				this.PrepreferredPeerIDSet = CurrentPreferred;
 	}
 }
 

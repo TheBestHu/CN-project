@@ -2,6 +2,8 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.nio.ByteBuffer;
+
 
 public class ClientConnection implements Runnable
 {
@@ -54,7 +56,7 @@ public class ClientConnection implements Runnable
 			w.TcpConnectionOutgoing(Integer.toString(myConnection.getMyPeerID()), this.serverAddress);
 		}
 		catch(Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 	} 
@@ -104,8 +106,9 @@ public class ClientConnection implements Runnable
 		//always read first 4 bytes, then read equivalent to the length indicated by those 4 bytes
 		byte[] lengthBuffer = new byte[4];
 		dis.readFully(lengthBuffer);
-		int length = Utilities.getIntFromByte(lengthBuffer, 0);
-		pipedOutputStream.write(Utilities.getBytes(length));
+		ByteBuffer buffer1 = ByteBuffer.wrap(lengthBuffer,0,4);
+		int length = buffer1.getInt();
+		pipedOutputStream.write(getBytes(length));
 
 		//now read the data indicated by length and write it to buffer
 		byte[] buffer = new byte[length];
@@ -178,22 +181,22 @@ public class ClientConnection implements Runnable
 	{
 		if(this.pipedOutputStream != null)
 		{	
-                        System.out.println("close piped OS");
+            System.out.println("close piped OS");
 			this.pipedOutputStream.close();
 		}
 		if(this.dis != null)
 		{						
-                        System.out.println("close dis");
+            System.out.println("close dis");
 			this.dis.close();
 		}
 		if(this.dos != null)
 		{						
-                        System.out.println("close dos");
+            System.out.println("close dos");
 			this.dos.close();
 		}
 		if(this.clientSocket != null)
 		{						
-                        System.out.println("close cli socket");
+            System.out.println("close cli socket");
 			this.clientSocket.close();
 		}
 	}
@@ -206,6 +209,17 @@ public class ClientConnection implements Runnable
 	public void setSoTimeout() throws SocketException
 	{
 		this.clientSocket.setSoTimeout(RECEIVE_TIMEOUT);
+	}
+	private static byte[] getBytes(int number){
+		byte[] result = new byte[4];
+		int shift = 0;
+		for (int i = 0; i < result.length; i++) {
+
+			shift = (result.length - 1 - i) * 8; // 24, 16, 8, 0
+
+			result[i] = (byte) (number >> shift);
+		}
+		return result;
 	}
 }
 
